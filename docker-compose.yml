@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  ecommerce:
+    build: ./ecommerce
+    container_name: ecommerce-service
+    ports:
+      - "8080:8080"
+    environment:
+      STORE_URL: "http://store:8081"
+      EXCHANGE_URL: "http://exchange:8082"
+      FIDELITY_URL: "http://fidelity:8083"
+    depends_on:
+      - store
+      - exchange
+      - fidelity
+
+  store:
+    build: ./store
+    container_name: store-service
+    ports:
+      - "8081:8081"
+    environment:
+      ECOMMERCE_URL: "http://ecommerce:8080"
+    depends_on:
+      - ecommerce
+
+  exchange:
+    build: ./exchange
+    container_name: exchange-service
+    ports:
+      - "8082:8082"
+    environment:
+      ECOMMERCE_URL: "http://ecommerce:8080"
+    depends_on:
+      - ecommerce
+
+  fidelity:
+    build: ./fidelity
+    container_name: fidelity-service
+    ports:
+      - "8083:8083"
+    environment:
+      ECOMMERCE_URL: "http://ecommerce:8080"
+    depends_on:
+      - ecommerce
