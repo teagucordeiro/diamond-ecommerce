@@ -8,21 +8,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.store.store_service.model.Product;
-import com.store.store_service.service.StoreService;
+import com.store.store_service.service.ProductService;
 
 @RestController
 @RequestMapping("/store")
-public class StoreController {
-  private final StoreService storeService;
+public class ProductController {
+  private final ProductService productService;
 
-  public StoreController(StoreService storeService) {
-    this.storeService = storeService;
+  public ProductController(ProductService productService) {
+    this.productService = productService;
   }
 
   @GetMapping("/product/{productId}")
   public ResponseEntity<Product> getProduct(@PathVariable String productId) {
     try {
-      Product productDetails = storeService.getProduct(productId);
+      Product productDetails = productService.getProduct(productId);
       return ResponseEntity.ok(productDetails);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);

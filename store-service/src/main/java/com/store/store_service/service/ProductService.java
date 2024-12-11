@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StoreService {
+public class ProductService {
   private static final List<Product> productList = new ArrayList<>();
 
   static {
