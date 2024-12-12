@@ -22,12 +22,12 @@ public class TransactionController {
   }
 
   @PostMapping("/sell")
-  public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionDTO transactionDTO) {
+  public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) {
     try {
       Transaction transaction = transactionService.createTransaction(transactionDTO.getProductId());
       return ResponseEntity.ok(transaction);
     } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
 }
