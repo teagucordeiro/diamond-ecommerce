@@ -18,7 +18,7 @@ public class WebConfig {
 
     @Bean
     public WebClient storeWebClient() {
-        return webClient("http://localhost:8081");
+        return webClient("http://localhost:8081/store");
     }
 
     @Bean
