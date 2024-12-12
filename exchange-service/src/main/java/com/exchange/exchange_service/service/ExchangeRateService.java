@@ -18,13 +18,20 @@ public class ExchangeRateService {
         return min + (max - min) * random.nextDouble();
     }
 
+    private void simulateCrash() {
+        if (random.nextDouble() < 0.1) {
+            throw new RuntimeException("Service crash: simulated failure.");
+        }
+    }
+
     public Exchange getExchangeRateResponse() {
+        simulateCrash();
+
         Double rate = getExchangeRate();
         return new Exchange(
                 "USD",
                 "BRL",
                 rate,
-                Instant.now().getEpochSecond()
-        );
+                Instant.now().getEpochSecond());
     }
 }
