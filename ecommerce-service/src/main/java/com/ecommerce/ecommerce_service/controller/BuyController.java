@@ -1,6 +1,5 @@
 package com.ecommerce.ecommerce_service.controller;
 
-import com.ecommerce.ecommerce_service.model.Product;
 import com.ecommerce.ecommerce_service.service.BuyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +22,9 @@ public class BuyController {
             @RequestParam("ft") Boolean faultToleranceEnabled) {
 
 
-        Product response = buyService.fetchProductResponse("23423");
+        String responseOfBuy = buyService.buyProduct("1");
 
 
-        return ResponseEntity.ok("Purchase processed successfully for product " + productId
-                + " by user " + userId + ". Fault tolerance: " + faultToleranceEnabled
-                + ". Service response: " + response.getName());
+        return ResponseEntity.ok(responseOfBuy);
     }
 }

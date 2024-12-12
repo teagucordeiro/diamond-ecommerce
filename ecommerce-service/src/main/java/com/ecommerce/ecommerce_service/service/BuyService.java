@@ -1,36 +1,30 @@
 package com.ecommerce.ecommerce_service.service;
 
-import com.ecommerce.ecommerce_service.model.Product;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+
+import com.ecommerce.ecommerce_service.model.Exchange;
+import com.ecommerce.ecommerce_service.model.Product;
 
 @Service
 public class BuyService {
-    private final WebClient webClient;
+    private final ProductService productService;
+    private final ExchangeService exchangeService;
 
-    @Autowired
-    public BuyService(WebClient storeWebClient) {
-        this.webClient = storeWebClient;
+    public BuyService(ProductService productService, ExchangeService exchangeService) {
+        this.productService = productService;
+        this.exchangeService = exchangeService;
     }
 
-    public Mono<Product> fetchProduct(String id) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/product")
-                        .queryParam("product", id)
-                        .build())
-                .retrieve()
-                .bodyToMono(Product.class)
-                .doOnError(error -> {
-                    System.err.println("Falha ao obter produto: " + error.getMessage());
-                });
+    private Double calcProductPrice(double productPrice, double exchangeRate) {
+        return productPrice * exchangeRate;
     }
 
-    public Product fetchProductResponse(String id) {
-        Mono<Product> responseMono = fetchProduct("2234");
+    public String buyProduct(String productID) {
+        Product product = productService.fetchProductResponse(productID);
+        Exchange exchange = exchangeService.fetchExchangeResponse();
+        Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 
-        return responseMono.block();
+        return "Product: " + product.getName() + "\ninit price: " + product.getValue() + "\nAfter exchange rate calc: "
+                + productPriceCalcWithExchangeRate;
     }
 }
