@@ -18,6 +18,10 @@ public class ProductService {
     productList.add(new Product("3", "PlayStation 5", 500.00));
   }
 
+  public List<Product> getAllProducts() {
+    return productList;
+  }
+
   public Product getProduct(String productId) {
     Optional<Product> product = productList.stream().filter(p -> p.getId().equals(productId)).findFirst();
     return product.orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + productId));
