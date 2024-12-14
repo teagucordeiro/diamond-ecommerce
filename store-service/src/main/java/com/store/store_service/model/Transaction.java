@@ -5,9 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Product {
-  private String id;
-  private String name;
-  private double value;
-  private int quantity;
+public class Transaction {
+  private String transactionId;
+  private Product product;
 }
