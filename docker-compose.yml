@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   ecommerce:
-    build: ./ecommerce
+    build:
+      context: ./ecommerce-service/
+      dockerfile: devops/Dockerfile
     container_name: ecommerce-service
     ports:
       - "8080:8080"
@@ -13,34 +13,37 @@ services:
     depends_on:
       - store
       - exchange
-      - fidelity
+      # - fidelity
 
   store:
-    build: ./store
+    build:
+      context: ./store-service/
+      dockerfile: devops/Dockerfile
     container_name: store-service
     ports:
       - "8081:8081"
     environment:
       ECOMMERCE_URL: "http://ecommerce:8080"
-    depends_on:
-      - ecommerce
 
   exchange:
-    build: ./exchange
-    container_name: exchange-service
+    build:
+      context: ./exchange-service/
+      dockerfile: devops/Dockerfile
     ports:
-      - "8082:8082"
+      - "8082"
     environment:
       ECOMMERCE_URL: "http://ecommerce:8080"
-    depends_on:
-      - ecommerce
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
 
-  fidelity:
-    build: ./fidelity
-    container_name: fidelity-service
-    ports:
-      - "8083:8083"
-    environment:
-      ECOMMERCE_URL: "http://ecommerce:8080"
-    depends_on:
-      - ecommerce
+  # fidelity:
+  #   build:
+  #     context: ./fidelity-service/
+  #     dockerfile: devops/Dockerfile
+  #   container_name: fidelity-service
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     ECOMMERCE_URL: "http://ecommerce:8080"

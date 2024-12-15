@@ -38,7 +38,7 @@ public class ExchangeService {
         .bodyToMono(Exchange.class).map(response -> {
           saveLastExchange(response);
           return response;
-        })
+        }).retry(1)
         .doOnError(error -> {
           System.err.println("Failed to get exchange rate: " + error.getMessage());
         });
