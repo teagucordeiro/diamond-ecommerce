@@ -20,7 +20,7 @@ public class WebConfig {
     private Environment environment;
 
     HttpClient httpClient = HttpClient.create()
-            .responseTimeout(Duration.ofSeconds(5));
+            .responseTimeout(Duration.ofSeconds(1));
 
     private WebClient webClient(String baseUrl) {
         return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient))
