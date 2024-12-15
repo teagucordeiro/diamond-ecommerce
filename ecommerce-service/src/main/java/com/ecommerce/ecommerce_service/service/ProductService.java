@@ -25,13 +25,13 @@ public class ProductService {
         .retrieve()
         .bodyToMono(Product.class)
         .doOnError(error -> {
-          System.err.println("Falha ao obter produto: " + error.getMessage());
+          System.err.println("Failed to get product: " + error.getMessage());
         });
   }
 
   public Product fetchProductResponse(String id) {
     Mono<Product> responseMono = fetchProduct(id);
-    
+
     return responseMono.block();
   }
 }
