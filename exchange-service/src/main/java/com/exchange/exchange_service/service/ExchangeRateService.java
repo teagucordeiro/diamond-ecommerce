@@ -23,7 +23,7 @@ public class ExchangeRateService {
 
     private void simulateCrash() {
         if (random.nextDouble() < 0.1) {
-            LOGGER.error("Simulando crash... o sistema será encerrado.");
+            LOGGER.error("Simulating crash, the system will be shutdown");
             System.exit(1);
         }
     }
