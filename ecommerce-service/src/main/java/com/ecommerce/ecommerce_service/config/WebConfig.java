@@ -34,7 +34,7 @@ public class WebConfig {
     }
 
     private String generateStoreReplicaURL(Integer replica) {
-        return String.join("", "http://localhost:3000", Integer.toString(replica), "/store");
+        return String.join("", "http://", environment.getProperty("STORE_REPLICA_NAME", "without-url-store"),"-", Integer.toString(replica + 1), ":", Integer.toString(8081), "/store");
     }
 
     @Bean
@@ -50,7 +50,7 @@ public class WebConfig {
 
     @Bean
     public WebClient exchangeWebClient() {
-        return webClient(environment.getProperty("EXCHANGE_URL", "http://localhost:32802"));
+        return webClient(environment.getProperty("EXCHANGE_URL", "http://localhost:32770"));
     }
 
     @Bean

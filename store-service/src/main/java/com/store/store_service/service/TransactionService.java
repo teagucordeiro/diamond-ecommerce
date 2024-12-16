@@ -18,7 +18,7 @@ public class TransactionService {
     this.productService = productService;
   }
 
-  public Transaction createTransaction(String productId) throws InterruptedException {
+  public Transaction createTransaction(String productId) {
     Product product = productService.getProduct(productId);
 
     if (product.getQuantity() <= 0) {

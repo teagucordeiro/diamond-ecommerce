@@ -10,6 +10,10 @@ public class Product {
     private String name;
     private double value;
 
+    public static Product genNullProduct() {
+        return new Product("null id", "null product", 0);
+    }
+
     @Override
     public String toString() {
         return "Product{" + "id=" + id + ", name='" + name + '\'' + ", price=" + value + '}';

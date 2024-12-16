@@ -2,20 +2,21 @@ package com.ecommerce.ecommerce_service.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.ecommerce_service.model.Product;
 
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
 
 @Service
 public class StoreTMRService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreTMRService.class);
 
     private final ProductService productService;
 
@@ -29,31 +30,32 @@ public class StoreTMRService {
         Mono<Product> replica2 = productService.fetchProduct(productId, 1);
         Mono<Product> replica3 = productService.fetchProduct(productId, 2);
 
-        return Mono.zip(replica1, replica2, replica3).flatMap(data -> {
-            List<Product> productResponses = List.of(data.getT1(), data.getT2(), data.getT3());
-            System.out.println(data.getT1().getName());
-            System.out.println(data.getT2().getName());
-            System.out.println(data.getT3().getName());
-            return determineMajorityProduct(productResponses);
-        });
+        Mono<Tuple3<Product, Product, Product>> zipped = Mono.zip(replica1, replica2, replica3);
+        return zipped.flatMap(tuple -> determineMajorityProduct(tuple.getT1(), tuple.getT2(), tuple.getT3(), productId))
+                .doOnError(error -> LOGGER.error("Error when trying to determine the most voted product"));
     }
 
-    private Mono<Product> determineMajorityProduct(List<Product> responses) {
-        Map<Product, Long> productVoteCounts = countProductVotes(responses);
-        return getProductWithHighestVote(productVoteCounts);
+    private Mono<Product> determineMajorityProduct(Product r1, Product r2, Product r3, String productID) {
+        List<Product> responses = new ArrayList<Product>(List.of(r1, r2, r3));
+        removeNullProducts(responses);
+
+        List<Product> matchingProducts = getProductsWithSameIDRequested(responses, productID);
+
+        if (matchingProducts.size() < 2) {
+            LOGGER.error("TMR Failure: Less than two replicas returned the same product.");
+            return Mono.empty();
+        }
+
+        return Mono.just(responses.get(0));
     }
 
-    private Map<Product, Long> countProductVotes(List<Product> responses) {
-        return filterNonNullProducts(responses)
-                .collect(Collectors.groupingBy(product -> product, Collectors.counting()));
+    private List<Product> getProductsWithSameIDRequested(List<Product> responses, String productID) {
+        return responses.stream().filter(product -> productID.equals(product.getId())).collect(Collectors.toList());
     }
 
-    private Stream<Product> filterNonNullProducts(List<Product> responses) {
-        return responses.stream().filter(Objects::nonNull);
-    }
+    private void removeNullProducts(List<Product> responses) {
+        Product productWithNullAttributes = Product.genNullProduct();
 
-    private Mono<Product> getProductWithHighestVote(Map<Product, Long> voteCounts) {
-        return Mono.just(voteCounts.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey)
-                .orElseThrow(() -> new RuntimeException("No majority response found")));
+        responses.removeIf(p -> p.equals(productWithNullAttributes));
     }
 }

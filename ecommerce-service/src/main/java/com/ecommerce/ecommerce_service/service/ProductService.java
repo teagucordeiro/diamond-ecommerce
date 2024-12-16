@@ -25,19 +25,8 @@ public class ProductService {
   public Mono<Product> fetchProduct(String id, Integer replica) {
     return storeWebClientReplicas.get(replica).get().uri(uriBuilder -> uriBuilder.path("/product/" + id).build())
         .retrieve().bodyToMono(Product.class).onErrorResume(e -> {
-          LOGGER.warn("Error fetching product from replica: " + replica);
-          return Mono.empty();
-      });
-  }
-
-  public Product fetchProductResponse(String id, Integer replica) {
-    try {
-      Mono<Product> responseMono = fetchProduct(id, replica);
-
-      return responseMono.block();
-    } catch (Exception e) {
-      LOGGER.warn("Error trying to get product of replica: " + replica);
-    }
-    return null;
+          LOGGER.error("Error fetching product from replica: " + replica + " error: " + e.getMessage());
+          return Mono.just(Product.genNullProduct());
+        });
   }
 }

@@ -25,7 +25,7 @@ services:
       dockerfile: devops/Dockerfile
       target: dev
     ports:
-      - "30000-30002:8081"
+      - "3000-3002:8081"
     environment:
       ECOMMERCE_URL: "http://ecommerce:8080"
     volumes:

@@ -21,6 +21,10 @@ public class BuyController {
 
         String responseOfBuy = buyService.buyProduct("1");
 
+        if (responseOfBuy == null) {
+            return ResponseEntity.status(504).body("Unable to connect to product service");
+        }
+
         return ResponseEntity.ok(responseOfBuy);
     }
 }

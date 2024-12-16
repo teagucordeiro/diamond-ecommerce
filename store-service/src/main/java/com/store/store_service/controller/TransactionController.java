@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.store.store_service.dto.TransactionDTO;
@@ -22,7 +21,7 @@ public class TransactionController {
   }
 
   @PostMapping("/sell")
-  public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) throws InterruptedException {
+  public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) {
     try {
       Transaction transaction = transactionService.createTransaction(transactionDTO.getProductId());
       return ResponseEntity.ok(transaction);
