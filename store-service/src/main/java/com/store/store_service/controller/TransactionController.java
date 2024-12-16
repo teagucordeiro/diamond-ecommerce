@@ -22,7 +22,7 @@ public class TransactionController {
   }
 
   @PostMapping("/sell")
-  public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) {
+  public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) throws InterruptedException {
     try {
       Transaction transaction = transactionService.createTransaction(transactionDTO.getProductId());
       return ResponseEntity.ok(transaction);

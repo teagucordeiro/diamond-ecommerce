@@ -19,11 +19,10 @@ public class BuyService {
     }
 
     public String buyProduct(String productID) {
-        Product product = storeTMRService.getProductWithMajorityVote(productID);
+        Product product = storeTMRService.getProductWithMajorityVote(productID).block();
         // Exchange exchange = exchangeService.fetchExchangeResponse();
-        Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), 6.3);
+        // Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), 6.3);
 
-        return "Product: " + product.getName() + "\ninit price: " + product.getValue() + "\nAfter exchange rate calc: "
-                + productPriceCalcWithExchangeRate;
+        return "Product:" + product.getName();
     }
 }

@@ -24,9 +24,10 @@ public class ProductService {
 
   public Mono<Product> fetchProduct(String id, Integer replica) {
     return storeWebClientReplicas.get(replica).get().uri(uriBuilder -> uriBuilder.path("/product/" + id).build())
-        .retrieve().bodyToMono(Product.class).doOnError(error -> {
-          System.err.println("Failed to get product: " + error.getMessage());
-        });
+        .retrieve().bodyToMono(Product.class).onErrorResume(e -> {
+          LOGGER.warn("Error fetching product from replica: " + replica);
+          return Mono.empty();
+      });
   }
 
   public Product fetchProductResponse(String id, Integer replica) {
