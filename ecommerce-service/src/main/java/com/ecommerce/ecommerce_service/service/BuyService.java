@@ -2,17 +2,16 @@ package com.ecommerce.ecommerce_service.service;
 
 import org.springframework.stereotype.Service;
 
-import com.ecommerce.ecommerce_service.model.Exchange;
 import com.ecommerce.ecommerce_service.model.Product;
 
 @Service
 public class BuyService {
-    private final ProductService productService;
     private final ExchangeService exchangeService;
+    private final StoreTMRService storeTMRService;
 
-    public BuyService(ProductService productService, ExchangeService exchangeService) {
-        this.productService = productService;
+    public BuyService(ExchangeService exchangeService, StoreTMRService storeTMRService) {
         this.exchangeService = exchangeService;
+        this.storeTMRService = storeTMRService;
     }
 
     private Double calcProductPrice(double productPrice, double exchangeRate) {
@@ -20,9 +19,9 @@ public class BuyService {
     }
 
     public String buyProduct(String productID) {
-        Product product = productService.fetchProductResponse(productID);
-        Exchange exchange = exchangeService.fetchExchangeResponse();
-        Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
+        Product product = storeTMRService.getProductWithMajorityVote(productID);
+        // Exchange exchange = exchangeService.fetchExchangeResponse();
+        Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), 6.3);
 
         return "Product: " + product.getName() + "\ninit price: " + product.getValue() + "\nAfter exchange rate calc: "
                 + productPriceCalcWithExchangeRate;

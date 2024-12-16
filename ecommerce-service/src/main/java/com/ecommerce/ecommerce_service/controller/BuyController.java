@@ -16,14 +16,10 @@ public class BuyController {
     }
 
     @PostMapping
-    public ResponseEntity<String> buyProduct(
-            @RequestParam("product") Long productId,
-            @RequestParam("user") Long userId,
+    public ResponseEntity<String> buyProduct(@RequestParam("product") Long productId, @RequestParam("user") Long userId,
             @RequestParam("ft") Boolean faultToleranceEnabled) {
 
-
         String responseOfBuy = buyService.buyProduct("1");
-
 
         return ResponseEntity.ok(responseOfBuy);
     }
