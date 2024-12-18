@@ -1,12 +1,12 @@
 package com.store.store_service.service;
 
-import com.store.store_service.model.Product;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+
+import com.store.store_service.model.Product;
 
 @Service
 public class ProductService {

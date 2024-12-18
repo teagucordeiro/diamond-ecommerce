@@ -7,12 +7,12 @@ import com.ecommerce.ecommerce_service.model.Product;
 
 @Service
 public class BuyService {
-    private final ProductService productService;
     private final ExchangeService exchangeService;
+    private final StoreTMRService storeTMRService;
 
-    public BuyService(ProductService productService, ExchangeService exchangeService) {
-        this.productService = productService;
+    public BuyService(ExchangeService exchangeService, StoreTMRService storeTMRService) {
         this.exchangeService = exchangeService;
+        this.storeTMRService = storeTMRService;
     }
 
     private Double calcProductPrice(double productPrice, double exchangeRate) {
@@ -20,11 +20,23 @@ public class BuyService {
     }
 
     public String buyProduct(String productID) {
-        Product product = productService.fetchProductResponse(productID);
+        Product product = storeTMRService.getProductWithMajorityVote(productID).block();
+
+        if (product == null) {
+            return null;
+        }
+
         Exchange exchange = exchangeService.fetchExchangeResponse();
         Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 
-        return "Product: " + product.getName() + "\ninit price: " + product.getValue() + "\nAfter exchange rate calc: "
-                + productPriceCalcWithExchangeRate;
+        return buildTransactionOutput(product, productPriceCalcWithExchangeRate, exchange);
+    }
+
+    private String buildTransactionOutput(Product product, Double productPriceXExchange, Exchange exchange) {
+        return String.format(
+                "Produto adquirido com sucesso!\n" + "=============================\n" + "Nome: %s\n"
+                        + "Preço Original (BRL): R$ %.2f\n" + "Taxa de Câmbio Atual: %.2f\n"
+                        + "Preço Convertido (USD): $ %.2f\n" + "=============================",
+                product.getName(), product.getValue(), exchange.getRate(), productPriceXExchange);
     }
 }
