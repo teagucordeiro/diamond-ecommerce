@@ -48,6 +48,18 @@ public class BonusService {
         users.add(new UserModel(userID, bonus));
     }
 
+    private void initSimulationFailure() throws InterruptedException {
+        Boolean isInsideFailureProbability = random.nextDouble() < FAILURE_PROBABILITY;
+
+        if (!inFailureMode.get() && isInsideFailureProbability) {
+            inFailureMode.set(true);
+            failureStartTime = Instant.now().toEpochMilli();
+            Thread.sleep(RESPONSE_DELAY_MS);
+            LOGGER.warn("The service took 2 seconds to respond");
+            throw new RuntimeException("The service took 2 seconds to respond");
+        }
+    }
+
     private Boolean isSimulatingFailure() throws InterruptedException {
         if (inFailureMode.get()) {
             Boolean isFailureTimeHasExpired = Instant.now().toEpochMilli() - failureStartTime >= FAILURE_DURATION_MS;
@@ -62,13 +74,8 @@ public class BonusService {
             throw new RuntimeException("The service took 2 seconds to respond");
         }
 
-        if (!inFailureMode.get() && random.nextDouble() < FAILURE_PROBABILITY) {
-            inFailureMode.set(true);
-            failureStartTime = Instant.now().toEpochMilli();
-            Thread.sleep(RESPONSE_DELAY_MS);
-            LOGGER.warn("The service took 2 seconds to respond");
-            throw new RuntimeException("The service took 2 seconds to respond");
-        }
+        initSimulationFailure();
+
         return false;
     }
 
