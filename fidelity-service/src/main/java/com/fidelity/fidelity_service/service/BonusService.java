@@ -59,7 +59,7 @@ public class BonusService {
 
             Thread.sleep(RESPONSE_DELAY_MS);
             LOGGER.warn("The service took 2 seconds to respond");
-            return true;
+            throw new RuntimeException("The service took 2 seconds to respond");
         }
 
         if (!inFailureMode.get() && random.nextDouble() < FAILURE_PROBABILITY) {
@@ -67,7 +67,7 @@ public class BonusService {
             failureStartTime = Instant.now().toEpochMilli();
             Thread.sleep(RESPONSE_DELAY_MS);
             LOGGER.warn("The service took 2 seconds to respond");
-            return true;
+            throw new RuntimeException("The service took 2 seconds to respond");
         }
         return false;
     }

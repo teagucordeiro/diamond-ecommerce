@@ -17,6 +17,7 @@ public class BonusController {
     @Autowired
     private BonusService bonusService;
 
+    
     @PostMapping
     public ResponseEntity<String> handleBonus(@RequestBody BonusModel bonusRequest) throws InterruptedException {
         try {
@@ -26,7 +27,7 @@ public class BonusController {
             bonusService.processBonus(userId, bonus);
             return ResponseEntity.ok("bonus added");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Can't proccess bonus");
+            return ResponseEntity.status(500).body("Can't proccess bonus, time was too long");
         }
     }
 
