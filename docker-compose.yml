@@ -21,11 +21,14 @@ services:
       context: ./store-service/
       dockerfile: devops/Dockerfile
       target: app
-    container_name: store-service
     ports:
-      - "8081:8081"
+      - "3000-3002:8081"
     environment:
       ECOMMERCE_URL: "http://ecommerce:8080"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
 
   exchange:
     build:
@@ -45,7 +48,7 @@ services:
   #   build:
   #     context: ./fidelity-service/
   #     dockerfile: devops/Dockerfile
-  target: app
+  #     target: app
   #   container_name: fidelity-service
   #   ports:
   #     - "8083:8083"
