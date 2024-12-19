@@ -17,7 +17,7 @@ services:
     depends_on:
       - store
       - exchange
-      # - fidelity
+      - fidelity
 
   store:
     build:
@@ -26,8 +26,6 @@ services:
       target: dev
     ports:
       - "3000-3002:8081"
-    environment:
-      ECOMMERCE_URL: "http://ecommerce:8080"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/
@@ -41,8 +39,6 @@ services:
       target: dev
     ports:
       - "8082"
-    environment:
-      ECOMMERCE_URL: "http://ecommerce:8080"
     volumes:
       - ./exchange-service:/srv/app
       - /srv/app/target/
@@ -51,12 +47,10 @@ services:
       restart_policy:
         condition: on-failure
 
-  # fidelity:
-  #   build:
-  #     context: ./fidelity-service/
-  #     dockerfile: devops/Dockerfile
-  #   container_name: fidelity-service
-  #   ports:
-  #     - "8083:8083"
-  #   environment:
-  #     ECOMMERCE_URL: "http://ecommerce:8080"
+  fidelity:
+    build:
+      context: ./fidelity-service/
+      dockerfile: devops/Dockerfile
+    container_name: fidelity-service
+    ports:
+      - "8083:8083"
