@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.store.store_service.dto.TransactionDTO;
 import com.store.store_service.model.Transaction;
 import com.store.store_service.service.TransactionService;
+import com.store.store_service.utils.RequestFailureSimulator;
 
 @RestController
 @RequestMapping("/store")
 public class TransactionController {
   private final TransactionService transactionService;
+  private final RequestFailureSimulator requestFailureSimulator = new RequestFailureSimulator();
 
   public TransactionController(TransactionService transactionService) {
     this.transactionService = transactionService;
@@ -22,6 +24,10 @@ public class TransactionController {
 
   @PostMapping("/sell")
   public ResponseEntity<?> createTransaction(@RequestBody TransactionDTO transactionDTO) {
+    if (requestFailureSimulator.shouldFail(0.1)) {
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service temporarily unavailable");
+    }
+
     try {
       Transaction transaction = transactionService.createTransaction(transactionDTO.getProductId());
       return ResponseEntity.ok(transaction);
