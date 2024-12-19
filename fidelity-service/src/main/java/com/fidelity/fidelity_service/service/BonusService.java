@@ -40,7 +40,7 @@ public class BonusService {
         if (userOptional.isPresent()) {
             return userOptional.get();
         }
-        LOGGER.warn("User not finded: " + userID);
+        LOGGER.warn("User not found: " + userID);
         return null;
     }
 
