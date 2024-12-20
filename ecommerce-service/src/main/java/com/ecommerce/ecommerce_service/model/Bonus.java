@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class BonusModel {
+public class Bonus {
   private Long user;
-    private Integer bonus;
+  private Integer bonus;
 }

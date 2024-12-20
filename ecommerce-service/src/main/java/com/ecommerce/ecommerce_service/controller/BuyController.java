@@ -19,7 +19,7 @@ public class BuyController {
     public ResponseEntity<String> buyProduct(@RequestParam("product") Long productId, @RequestParam("user") Long userId,
             @RequestParam("ft") Boolean faultToleranceEnabled) {
 
-        String responseOfBuy = buyService.buyProduct("1");
+        String responseOfBuy = buyService.buyProduct("1", userId);
 
         if (responseOfBuy == null) {
             return ResponseEntity.status(504).body("Unable to connect to product service");
