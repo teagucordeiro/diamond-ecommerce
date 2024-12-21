@@ -14,7 +14,7 @@ Este projeto reúne quatro serviços:
 - 💱 **Exchange**
 - 🎉 **Fidelity**
 
-É um trabalho da disciplina de **Tolerância a Falhas** do Metropole Digital. O objetivo é demonstrar técnicas para lidar com falhas em um cenário de ecommerce complexo, baseado em microserviços.
+É um trabalho da disciplina de **Tolerância a Falhas em Sistemas de Software** do Metropole Digital. O objetivo é demonstrar técnicas para lidar com falhas em um cenário de ecommerce complexo, baseado em microserviços.
 
 ---
 
