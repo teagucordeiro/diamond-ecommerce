@@ -16,14 +16,17 @@ import org.springframework.stereotype.Service;
 import com.fidelity.fidelity_service.model.BonusModel;
 import com.fidelity.fidelity_service.model.UserModel;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class BonusService {
+
     @Value("${FIDELITY_ERROR_PROBABILITY}")
-    private static String fidelityErrorProbability;
+    private String fidelityErrorProbability;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BonusService.class);
 
-    private static final Double FAILURE_PROBABILITY = Double.parseDouble(fidelityErrorProbability);
+    private Double FAILURE_PROBABILITY;
     private static final long FAILURE_DURATION_MS = 30 * 1000;
     private static final long RESPONSE_DELAY_MS = 2000;
 
@@ -33,6 +36,11 @@ public class BonusService {
     private final Random random = new Random();
 
     private List<UserModel> users = new ArrayList<UserModel>();
+
+    @PostConstruct
+    public void init() {
+        this.FAILURE_PROBABILITY = Double.parseDouble(fidelityErrorProbability);
+    }
 
     @Autowired
     public BonusService(List<UserModel> users) {
