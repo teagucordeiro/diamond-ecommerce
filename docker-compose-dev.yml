@@ -29,7 +29,7 @@ services:
     ports:
       - "3000-3002:8081"
     environment:
-      STORE_ERROR_PROBABILITY: "0.6"
+      STORE_ERROR_PROBABILITY: "0.2"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/
@@ -60,6 +60,8 @@ services:
     container_name: fidelity-service
     ports:
       - "8083:8083"
+    environment:
+      FIDELITY_ERROR_PROBABILITY: "0.2"
 
   database:
     image: postgres:13

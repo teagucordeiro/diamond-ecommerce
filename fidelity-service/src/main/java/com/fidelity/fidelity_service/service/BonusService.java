@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fidelity.fidelity_service.model.BonusModel;
@@ -17,9 +18,12 @@ import com.fidelity.fidelity_service.model.UserModel;
 
 @Service
 public class BonusService {
+    @Value("${FIDELITY_ERROR_PROBABILITY}")
+    private static String fidelityErrorProbability;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BonusService.class);
 
-    private static final Double FAILURE_PROBABILITY = 0.2;
+    private static final Double FAILURE_PROBABILITY = Double.parseDouble(fidelityErrorProbability);
     private static final long FAILURE_DURATION_MS = 30 * 1000;
     private static final long RESPONSE_DELAY_MS = 2000;
 
