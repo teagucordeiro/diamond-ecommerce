@@ -5,6 +5,9 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.exchange.exchange_service.model.Exchange;
@@ -12,6 +15,9 @@ import com.exchange.exchange_service.model.Exchange;
 @Service
 public class ExchangeRateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateService.class);
+
+    @Value("${EXCHANGE_ERROR_PROBABILITY}")
+    private String exchangeErrorProbability;
 
     private final Random random = new Random();
 
@@ -22,7 +28,7 @@ public class ExchangeRateService {
     }
 
     private void simulateCrash() {
-        if (random.nextDouble() < 0.1) {
+        if (random.nextDouble() < Double.parseDouble(exchangeErrorProbability)) {
             LOGGER.error("Simulating crash, the system will be shutdown");
             System.exit(1);
         }
@@ -34,10 +40,6 @@ public class ExchangeRateService {
 
         simulateCrash();
 
-        return new Exchange(
-                "USD",
-                "BRL",
-                rate,
-                Instant.now().getEpochSecond());
+        return new Exchange("USD", "BRL", rate, Instant.now().getEpochSecond());
     }
 }

@@ -17,9 +17,9 @@ public class BuyController {
 
     @PostMapping
     public ResponseEntity<String> buyProduct(@RequestParam("product") Long productId, @RequestParam("user") Long userId,
-            @RequestParam("ft") Boolean faultToleranceEnabled) {
+            @RequestParam("ft") Boolean isFaultToleranceEnabled) {
 
-        String responseOfBuy = buyService.buyProduct("1", userId);
+        String responseOfBuy = buyService.buyProduct("1", isFaultToleranceEnabled, userId);
 
         if (responseOfBuy == null) {
             return ResponseEntity.status(504).body("Unable to connect to product service");

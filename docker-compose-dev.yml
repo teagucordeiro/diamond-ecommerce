@@ -41,6 +41,8 @@ services:
       target: dev
     ports:
       - "8082"
+    environment:
+      EXCHANGE_ERROR_PROBABILITY: "0.1"
     volumes:
       - ./exchange-service:/srv/app
       - /srv/app/target/

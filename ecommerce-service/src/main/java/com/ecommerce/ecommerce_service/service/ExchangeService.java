@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class ExchangeService {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeService.class);
-  
+
   private final WebClient webClient;
   private Exchange cachedExchange;
 
@@ -26,38 +26,53 @@ public class ExchangeService {
     this.cachedExchange = lastExchange;
   }
 
-  public Mono<Exchange> fetchExchange() {
-    return webClient.get()
-        .uri(uriBuilder -> uriBuilder
-            .path("/exchange")
-            .build())
-        .retrieve()
-        .onStatus(t -> t.is5xxServerError(), response -> Mono.error(
-            new RuntimeException("Exchange Service Error")))
-        .bodyToMono(Exchange.class).map(response -> {
+  private Mono<Exchange> onErrorResume(Boolean isFaultToleranceEnabled) {
+    if (!isFaultToleranceEnabled) {
+      LOGGER.error("Exchange error: Fault tolerance is disabled. Returning empty response.");
+      return Mono.empty();
+    }
+    Exchange fallbackExchange = getLastKnownRate();
+
+    if (fallbackExchange != null) {
+      LOGGER.warn("Exchange service failed. Using cached exchange rate: {}", fallbackExchange);
+      return Mono.just(fallbackExchange);
+    } else {
+      LOGGER.error("No last known exchange rate available for fallback.");
+      return Mono.error(new RuntimeException("No last known exchange rate available for fallback."));
+    }
+  }
+
+  private Mono<? extends Throwable> onServerError() {
+    LOGGER.error("Exchange service returned a 5xx server error.");
+    return Mono.error(new RuntimeException("Exchange service returned a 5xx server error"));
+  }
+
+  private Integer getNumberOfRetries(Boolean isFaultToleranceEnabled) {
+    if (isFaultToleranceEnabled) {
+      return 1;
+    }
+    return 0;
+  }
+
+  private void doOnError(Throwable error) {
+    LOGGER.error("Failed to fetch exchange rate: {}", error.getMessage());
+  }
+
+  public Mono<Exchange> fetchExchange(Boolean isFaultToleranceEnabled) {
+    return webClient.get().uri(uriBuilder -> uriBuilder.path("/exchange").build()).retrieve()
+        .onStatus(t -> t.is5xxServerError(), response -> onServerError()).bodyToMono(Exchange.class).map(response -> {
           saveLastExchange(response);
           return response;
-        }).retry(1)
-        .doOnError(error -> {
-          System.err.println("Failed to get exchange rate: " + error.getMessage());
-        });
+        }).retry(getNumberOfRetries(isFaultToleranceEnabled)).doOnError(error -> doOnError(error))
+        .onErrorResume(ex -> onErrorResume(isFaultToleranceEnabled));
   }
 
   public Exchange getLastKnownRate() {
     return cachedExchange;
   }
 
-  public Exchange fetchExchangeResponse() {
-    Mono<Exchange> responseMono = fetchExchange().onErrorResume(ex -> {
-      Exchange fallbackExchange = getLastKnownRate();
-      if (fallbackExchange != null) {
-        LOGGER.warn("Exchange service failure. Using cached value.");
-        return Mono.just(fallbackExchange);
-      } else {
-        return Mono.error(new RuntimeException("No last known rate available", ex));
-      }
-    });
-    ;
+  public Exchange fetchExchangeResponse(Boolean isFaultToleranceEnabled) {
+    Mono<Exchange> responseMono = fetchExchange(isFaultToleranceEnabled);
 
     return responseMono.block();
   }
