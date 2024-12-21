@@ -34,7 +34,8 @@ public class WebConfig {
     }
 
     private String generateStoreReplicaURL(Integer replica) {
-        return String.join("", "http://", environment.getProperty("STORE_REPLICA_NAME", "without-url-store"),"-", Integer.toString(replica + 1), ":", Integer.toString(8081), "/store");
+        return String.join("", "http://", environment.getProperty("STORE_REPLICA_NAME", "without-url-store"), "-",
+                Integer.toString(replica + 1), ":", Integer.toString(8081), "/store");
     }
 
     @Bean
@@ -55,6 +56,6 @@ public class WebConfig {
 
     @Bean
     public WebClient fidelityWebClient() {
-        return webClient("http://localhost:8083");
+        return webClient(environment.getProperty("FIDELITY_URL", "http://localhost:8083"));
     }
 }
