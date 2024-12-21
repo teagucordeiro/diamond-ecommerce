@@ -64,7 +64,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./dbfiles:/var/lib/postgresql/data
+      - ./dbfiles:/var/lib/postgres/data
     environment:
       POSTGRES_PASSWORD: papasord
       POSTGRES_USER: ecommerce

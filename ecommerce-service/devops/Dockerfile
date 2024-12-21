@@ -2,7 +2,7 @@ FROM maven:3.9.4-eclipse-temurin-21 AS base
 RUN mkdir /srv/app
 COPY . /srv/app
 WORKDIR /srv/app
-RUN mvn clean install
+RUN  mvn install clean package -DskipTests
 
 FROM amazoncorretto:21-alpine-jdk as app
 RUN mkdir /srv/app

@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class BonusModel {
-  private Long user;
-    private Integer bonus;
+  private Long userID;
+  private Integer bonus;
 }

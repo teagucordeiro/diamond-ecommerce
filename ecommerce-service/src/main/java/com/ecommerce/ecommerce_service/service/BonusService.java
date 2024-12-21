@@ -1,5 +1,7 @@
 package com.ecommerce.ecommerce_service.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,7 @@ public class BonusService {
   }
 
   private Mono<? extends Throwable> onFidelityServiceServerError() {
-    return Mono.error(new RuntimeException("Exchange Service Error"));
+    return Mono.error(new RuntimeException("Exchange Service Error - Unable to process request at the moment"));
   }
 
   public Mono<String> fetchBonus(Long userId, Integer bonus) {
@@ -35,9 +37,38 @@ public class BonusService {
         .bodyToMono(String.class).map(response -> {
           return response;
         }).doOnError(throwable -> {
-          LOGGER.error("Error trying to save bonus");
+          LOGGER.error("Error trying to save bonus for userId: {} with bonus: {}", userId, bonus);
           saveLogAfterFault(userId, bonus);
-        });
+        }).onErrorResume(t -> Mono.empty());
+  }
+
+  public Mono<String> fetchListBonus(List<Bonus> listBonus, List<BonusLog> listBonusLog) {
+    LOGGER.info("Trying to save bonus log, items: {}", listBonus.size());
+    return webClient.post().uri(uriBuilder -> uriBuilder.path("/bonus/list").build()).bodyValue(listBonus).retrieve()
+        .onStatus(t -> t.is5xxServerError(), response -> onFidelityServiceServerError()).bodyToMono(String.class)
+        .map(response -> {
+          return response;
+        }).doOnSuccess(response -> saveBonusesAfterRetriedLogSuccess(listBonusLog)).doOnError(throwable -> {
+          LOGGER.error("Error trying to save list log of bonus. Items: {}.", listBonus.size());
+        }).onErrorResume(t -> Mono.empty());
+  }
+
+  public Mono<String> fetchBonusStatus() {
+    return webClient.get().uri(uriBuilder -> uriBuilder.path("/bonus/status").build()).retrieve()
+        .onStatus(t -> t.is5xxServerError(), response -> onFidelityServiceServerError()).bodyToMono(String.class)
+        .map(response -> {
+          return response;
+        }).doOnError(throwable -> {
+          LOGGER.error("Error trying to get status of bonus endpoint");
+        }).onErrorResume(t -> Mono.empty());
+  }
+
+  private void saveBonusesAfterRetriedLogSuccess(List<BonusLog> listBonusLog) {
+    System.out.println("Saving after sent logs with successfull");
+    for (BonusLog log : listBonusLog) {
+      log.setResolved(true);
+      bonusLogRepository.save(log);
+    }
   }
 
   private void saveLogAfterFault(Long userId, Integer bonus) {

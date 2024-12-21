@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fidelity.fidelity_service.model.BonusModel;
 import com.fidelity.fidelity_service.model.UserModel;
 
 @Service
@@ -79,8 +80,31 @@ public class BonusService {
         return false;
     }
 
+    public String BonusEndpointStatus() {
+        if (inFailureMode.get()) {
+            Boolean isFailureTimeHasExpired = Instant.now().toEpochMilli() - failureStartTime >= FAILURE_DURATION_MS;
+
+            if (isFailureTimeHasExpired) {
+                inFailureMode.set(false);
+            }
+
+            return "down";
+        }
+        return "up";
+    }
+
     public List<UserModel> getAllUsers() {
         return users;
+    }
+
+    public void processBonuses(List<BonusModel> bonuses) throws InterruptedException {
+        if (isSimulatingFailure()) {
+            return;
+        }
+
+        for (BonusModel bonusItem : bonuses) {
+            processBonus(bonusItem.getUserID(), bonusItem.getBonus());
+        }
     }
 
     public void processBonus(Long userId, Integer bonus) throws InterruptedException {
