@@ -28,6 +28,10 @@ public class BuyService {
             return null;
         }
 
+        if (product.getId().equals("null id")) {
+            return null;
+        }
+
         Exchange exchange = exchangeService.fetchExchangeResponse(isFaultToleranceEnabled);
         Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 

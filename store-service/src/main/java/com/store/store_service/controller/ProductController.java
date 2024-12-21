@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,9 @@ public class ProductController {
   private final ProductService productService;
   private final Random random = new Random();
 
+  @Value("${STORE_ERROR_PROBABILITY}")
+  private String storeErrorProbability;
+
   public ProductController(ProductService productService) {
     this.productService = productService;
   }
@@ -31,16 +35,17 @@ public class ProductController {
 
   @GetMapping("/product/{productId}")
   public CompletableFuture<ResponseEntity<Product>> getProduct(@PathVariable String productId) {
-    if (random.nextDouble() < 0.2) {
+    if (random.nextDouble() < Double.parseDouble(storeErrorProbability)) {
       return new CompletableFuture<>();
     }
 
-    return CompletableFuture.supplyAsync(() -> { 
+    return CompletableFuture.supplyAsync(() -> {
       try {
-      Product productDetails = productService.getProduct(productId);
-      return ResponseEntity.ok(productDetails);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }});
+        Product productDetails = productService.getProduct(productId);
+        return ResponseEntity.ok(productDetails);
+      } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+      }
+    });
   }
 }
