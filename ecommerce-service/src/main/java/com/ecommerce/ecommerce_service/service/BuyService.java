@@ -10,11 +10,14 @@ public class BuyService {
     private final ExchangeService exchangeService;
     private final StoreTMRService storeTMRService;
     private final BonusService bonusService;
+    private final StoreSellService storeSellService;
 
-    public BuyService(ExchangeService exchangeService, StoreTMRService storeTMRService, BonusService bonusService) {
+    public BuyService(ExchangeService exchangeService, StoreTMRService storeTMRService, 
+                      BonusService bonusService, StoreSellService storeSellService) {
         this.exchangeService = exchangeService;
         this.storeTMRService = storeTMRService;
         this.bonusService = bonusService;
+        this.storeSellService = storeSellService;
     }
 
     private Double calcProductPrice(double productPrice, double exchangeRate) {
@@ -31,18 +34,20 @@ public class BuyService {
         Exchange exchange = exchangeService.fetchExchangeResponse();
         Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 
+        String sellResponse = storeSellService.createTransaction(productID);
+
         Integer bonus = productPriceCalcWithExchangeRate.intValue();
         String bonusResponse = bonusService.fetchBonus(userID, bonus).block();
 
-        return buildTransactionOutput(product, productPriceCalcWithExchangeRate, exchange, bonusResponse);
+        return buildTransactionOutput(product, productPriceCalcWithExchangeRate, exchange, sellResponse, bonusResponse);
     }
 
     private String buildTransactionOutput(Product product, Double productPriceXExchange, Exchange exchange,
-            String bonusResponse) {
+            String sellResponse, String bonusResponse) {
         return String.format(
                 "Produto adquirido com sucesso!\n" + "=============================\n" + "Nome: %s\n"
                         + "Preço Original (BRL): R$ %.2f\n" + "Taxa de Câmbio Atual: %.2f\n"
-                        + "Preço Convertido (USD): $ %.2f\n" + "Bonus: %s\n" + "=============================",
-                product.getName(), product.getValue(), exchange.getRate(), productPriceXExchange, bonusResponse);
+                        + "Preço Convertido (USD): $ %.2f\n" + "Registro da venda: %s\n" + "Bonus: %s\n" + "=============================",
+                product.getName(), product.getValue(), exchange.getRate(), productPriceXExchange, sellResponse, bonusResponse);
     }
 }
