@@ -23,6 +23,17 @@ public class BonusRetryTask {
     this.failureLogRepository = failureLogRepository;
   }
 
+  private void sentLogsToTryPostBonusAgain(String bonusEndpointStatus, List<BonusLog> failedLogs) {
+    if (bonusEndpointStatus.equals("up")) {
+      List<Bonus> bonusToTrySaveAgain = new ArrayList<Bonus>();
+      for (BonusLog bonusItem : failedLogs) {
+        bonusToTrySaveAgain.add(new Bonus(bonusItem.getUserId(), bonusItem.getBonus()));
+      }
+
+      bonusService.fetchListBonus(bonusToTrySaveAgain, failedLogs).block();
+    }
+  }
+
   @Scheduled(fixedDelay = 30 * 1000) // 30 seconds
   public void retryFailedRequests() {
     var failedLogs = failureLogRepository.findByResolvedFalse();
@@ -31,14 +42,7 @@ public class BonusRetryTask {
       String bonusEndpointStatus = bonusService.fetchBonusStatus().block();
       System.out.println("bonusStatus: " + bonusEndpointStatus);
 
-      if (bonusEndpointStatus.equals("up")) {
-        List<Bonus> bonusToTrySaveAgain = new ArrayList<Bonus>();
-        for (BonusLog bonusItem : failedLogs) {
-          bonusToTrySaveAgain.add(new Bonus(bonusItem.getUserId(), bonusItem.getBonus()));
-        }
-
-        bonusService.fetchListBonus(bonusToTrySaveAgain, failedLogs).block();
-      }
+      sentLogsToTryPostBonusAgain(bonusEndpointStatus, failedLogs);
     }
   }
 }
