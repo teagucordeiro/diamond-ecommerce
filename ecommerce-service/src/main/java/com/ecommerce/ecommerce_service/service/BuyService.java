@@ -36,7 +36,7 @@ public class BuyService {
         Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 
         Integer bonus = productPriceCalcWithExchangeRate.intValue();
-        String bonusResponse = bonusService.fetchBonus(userID, bonus).block();
+        String bonusResponse = bonusService.fetchBonus(userID, bonus, isFaultToleranceEnabled).block();
 
         return buildTransactionOutput(product, productPriceCalcWithExchangeRate, exchange, bonusResponse);
     }
