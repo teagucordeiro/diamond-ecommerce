@@ -33,7 +33,7 @@ public class StoreSellService {
                         .bodyToMono(String.class)
                         .block();
             } catch (Exception e) {
-                LOGGER.error("Failed to communicate with replica: {}, error: {}", webClient, e.getMessage());
+                LOGGER.error("Failed to communicate with replica: {}", webClient);
             }
         }
 
@@ -41,7 +41,7 @@ public class StoreSellService {
     }
 
     private String fallbackCreateTransaction(String productId, Throwable throwable) {
-        LOGGER.error("Circuit breaker activated. Fallback method called. Error: {}", throwable.getMessage());
+        LOGGER.error("Circuit breaker activated. Fallback method called.");
         return "Service temporarily unavailable. Please try again later.";
     }
 }
