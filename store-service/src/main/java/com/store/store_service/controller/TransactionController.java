@@ -19,7 +19,7 @@ public class TransactionController {
   private final TransactionService transactionService;
   private final RequestFailureSimulator requestFailureSimulator = new RequestFailureSimulator();
 
-  @Value("${STORE_SELL_PROBABILITY}")
+  @Value("${STORE_SELL_ERROR_PROBABILITY}")
   private String storeSellErrorProbability;
 
   public TransactionController(TransactionService transactionService) {
