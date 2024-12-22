@@ -11,10 +11,12 @@ services:
       STORE_REPLICA_NAME: "diamond-ecommerce-store"
       EXCHANGE_URL: "http://exchange:8082"
       FIDELITY_URL: "http://fidelity:8083"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/ecommerce-bonus-log-db
     depends_on:
       - store
       - exchange
       - fidelity
+      - database
 
   store:
     build:
@@ -23,6 +25,9 @@ services:
       target: app
     ports:
       - "3000-3002:8081"
+    environment:
+      STORE_SELL_ERROR_PROBABILITY: "0.1"
+      STORE_PRODUCT_ERROR_PROBABILITY: "0.2"
     deploy:
       replicas: 3
       restart_policy:
@@ -35,6 +40,8 @@ services:
       target: app
     ports:
       - "8082"
+    environment:
+      EXCHANGE_ERROR_PROBABILITY: "0.1"
     deploy:
       replicas: 2
       restart_policy:
@@ -48,3 +55,18 @@ services:
     container_name: fidelity-service
     ports:
       - "8083:8083"
+    environment:
+      FIDELITY_ERROR_PROBABILITY: "0.1"
+
+  database:
+    image: postgres:13
+    restart: always
+    container_name: database
+    ports:
+      - 5432:5432
+    volumes:
+      - ./dbfiles:/var/lib/postgres/data
+    environment:
+      POSTGRES_PASSWORD: papasord
+      POSTGRES_USER: ecommerce
+      POSTGRES_DB: ecommerce-bonus-log-db
