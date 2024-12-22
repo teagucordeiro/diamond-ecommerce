@@ -30,12 +30,14 @@ services:
       - "3000-3002:8081"
     environment:
       STORE_SELL_ERROR_PROBABILITY: "0.1"
-      STORE_PRODUCT_ERROR_PROBABILITY: "1"
+      STORE_PRODUCT_ERROR_PROBABILITY: "0.2"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/
     deploy:
       replicas: 3
+      restart_policy:
+        condition: on-failure
 
   exchange:
     build:
@@ -58,11 +60,12 @@ services:
     build:
       context: ./fidelity-service/
       dockerfile: devops/Dockerfile
+      target: dev
     container_name: fidelity-service
     ports:
       - "8083:8083"
     environment:
-      FIDELITY_ERROR_PROBABILITY: "0.2"
+      FIDELITY_ERROR_PROBABILITY: "0.1"
 
   database:
     image: postgres:13
