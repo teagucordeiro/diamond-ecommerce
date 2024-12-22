@@ -31,15 +31,23 @@ public class BonusService {
     return Mono.error(new RuntimeException("Exchange Service Error - Unable to process request at the moment"));
   }
 
-  public Mono<String> fetchBonus(Long userId, Integer bonus) {
+  private void doOnErrorFetchBonus(Long userId, Integer bonus, Boolean isFaultToleranceEnabled) {
+    LOGGER.error("Error trying to save bonus for userId: {} with bonus: {}", userId, bonus);
+
+    if (!isFaultToleranceEnabled) {
+      return;
+    }
+
+    saveLogAfterFault(userId, bonus);
+  }
+
+  public Mono<String> fetchBonus(Long userId, Integer bonus, Boolean isFaultToleranceEnabled) {
     return webClient.post().uri(uriBuilder -> uriBuilder.path("/bonus").build()).bodyValue(new Bonus(userId, bonus))
         .retrieve().onStatus(t -> t.is5xxServerError(), response -> onFidelityServiceServerError())
         .bodyToMono(String.class).map(response -> {
           return response;
-        }).doOnError(throwable -> {
-          LOGGER.error("Error trying to save bonus for userId: {} with bonus: {}", userId, bonus);
-          saveLogAfterFault(userId, bonus);
-        }).onErrorResume(t -> Mono.empty());
+        }).doOnError(throwable -> doOnErrorFetchBonus(userId, bonus, isFaultToleranceEnabled))
+        .onErrorResume(t -> Mono.empty());
   }
 
   public Mono<String> fetchListBonus(List<Bonus> listBonus, List<BonusLog> listBonusLog) {

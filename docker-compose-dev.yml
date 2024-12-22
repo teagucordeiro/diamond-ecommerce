@@ -29,7 +29,8 @@ services:
     ports:
       - "3000-3002:8081"
     environment:
-      STORE_SELL_PROBABILITY="0.1"
+      STORE_SELL_ERROR_PROBABILITY: "0.1"
+      STORE_PRODUCT_ERROR_PROBABILITY: "1"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/
@@ -43,6 +44,8 @@ services:
       target: dev
     ports:
       - "8082"
+    environment:
+      EXCHANGE_ERROR_PROBABILITY: "0.1"
     volumes:
       - ./exchange-service:/srv/app
       - /srv/app/target/
@@ -58,6 +61,8 @@ services:
     container_name: fidelity-service
     ports:
       - "8083:8083"
+    environment:
+      FIDELITY_ERROR_PROBABILITY: "0.2"
 
   database:
     image: postgres:13

@@ -25,8 +25,13 @@ public class StoreTMRService {
         this.productService = productService;
     }
 
-    public Mono<Product> getProductWithMajorityVote(String productId) {
+    public Mono<Product> getProductWithMajorityVote(String productId, Boolean isFaultToleranceEnabled) {
         Mono<Product> replica1 = productService.fetchProduct(productId, 0);
+
+        if (!isFaultToleranceEnabled) {
+            return replica1;
+        }
+
         Mono<Product> replica2 = productService.fetchProduct(productId, 1);
         Mono<Product> replica3 = productService.fetchProduct(productId, 2);
 
