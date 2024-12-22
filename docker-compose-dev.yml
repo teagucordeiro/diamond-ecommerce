@@ -29,7 +29,7 @@ services:
     ports:
       - "3000-3002:8081"
     environment:
-      STORE_ERROR_PROBABILITY: "0.2"
+      STORE_PRODUCT_ERROR_PROBABILITY: "1"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/

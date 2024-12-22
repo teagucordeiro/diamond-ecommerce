@@ -21,7 +21,7 @@ public class ProductController {
   private final ProductService productService;
   private final Random random = new Random();
 
-  @Value("${STORE_ERROR_PROBABILITY}")
+  @Value("${STORE_PRODUCT_ERROR_PROBABILITY}")
   private String storeErrorProbability;
 
   public ProductController(ProductService productService) {
