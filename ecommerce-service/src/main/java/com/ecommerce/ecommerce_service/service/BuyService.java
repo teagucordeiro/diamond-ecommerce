@@ -21,18 +21,22 @@ public class BuyService {
         return productPrice * exchangeRate;
     }
 
-    public String buyProduct(String productID, Long userID) {
-        Product product = storeTMRService.getProductWithMajorityVote(productID).block();
+    public String buyProduct(String productID, Boolean isFaultToleranceEnabled, Long userID) {
+        Product product = storeTMRService.getProductWithMajorityVote(productID, isFaultToleranceEnabled).block();
 
         if (product == null) {
             return null;
         }
 
-        Exchange exchange = exchangeService.fetchExchangeResponse();
+        if (product.getId().equals("null id")) {
+            return null;
+        }
+
+        Exchange exchange = exchangeService.fetchExchangeResponse(isFaultToleranceEnabled);
         Double productPriceCalcWithExchangeRate = calcProductPrice(product.getValue(), exchange.getRate());
 
         Integer bonus = productPriceCalcWithExchangeRate.intValue();
-        String bonusResponse = bonusService.fetchBonus(userID, bonus).block();
+        String bonusResponse = bonusService.fetchBonus(userID, bonus, isFaultToleranceEnabled).block();
 
         return buildTransactionOutput(product, productPriceCalcWithExchangeRate, exchange, bonusResponse);
     }
