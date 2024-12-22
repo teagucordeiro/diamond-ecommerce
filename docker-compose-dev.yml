@@ -28,6 +28,8 @@ services:
       target: dev
     ports:
       - "3000-3002:8081"
+    environment:
+      STORE_SELL_PROBABILITY="0.1"
     volumes:
       - ./store-service:/srv/app
       - /srv/app/target/
@@ -62,7 +64,7 @@ services:
     restart: always
     container_name: database
     ports:
-      - 5432:5432
+      - 5433:5432
     volumes:
       - ./dbfiles:/var/lib/postgres/data
     environment:
