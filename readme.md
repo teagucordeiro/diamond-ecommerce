@@ -63,4 +63,7 @@ Este projeto reúne quatro serviços:
    ```
 3. Acesse cada serviço conforme configurado nos containers.
 
+   
+Obs.: ao executar o projeto no windows, pode ser que o nome dos containers recebam um afixo "main" e necessite adptar as variáveis de ambiente. A exemplo: "diamond-ecommerce-main-exchange-1".
+
 Feito com muito ☕ e dedicação.
