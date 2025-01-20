@@ -20,9 +20,17 @@ public class BuyController {
             @RequestParam("ft") Boolean isFaultToleranceEnabled) {
 
         String responseOfBuy = buyService.buyProduct("1", isFaultToleranceEnabled, userId);
+        System.out.println(responseOfBuy);
 
         if (responseOfBuy == null) {
             return ResponseEntity.status(504).body("Unable to connect to product service");
+        }
+
+        if (responseOfBuy.equals("No exchange service response")) {
+            return ResponseEntity.status(504).body("No exchange service response");
+        }
+        if (responseOfBuy.equals("No sell service response")) {
+            return ResponseEntity.status(504).body("No sell service response");
         }
 
         return ResponseEntity.ok(responseOfBuy);

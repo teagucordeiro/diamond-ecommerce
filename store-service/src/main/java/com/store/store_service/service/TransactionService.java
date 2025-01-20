@@ -21,11 +21,11 @@ public class TransactionService {
   public Transaction createTransaction(String productId) {
     Product product = productService.getProduct(productId);
 
-    if (product.getQuantity() <= 0) {
-      throw new RuntimeException("Product out of stock: " + product.getName());
-    }
+    // if (product.getQuantity() <= 0) {
+    //   throw new RuntimeException("Product out of stock: " + product.getName());
+    // }
 
-    product.setQuantity(product.getQuantity() - 1);
+    // product.setQuantity(product.getQuantity() - 1);
 
     Transaction transaction = new Transaction(UUID.randomUUID().toString(), product);
     transactionList.add(transaction);

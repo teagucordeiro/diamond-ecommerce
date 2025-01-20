@@ -10,4 +10,5 @@ public class Exchange {
     private String targetCurrency;
     private Double rate;
     private Long timestamp;
+    private Boolean isCached;
 }

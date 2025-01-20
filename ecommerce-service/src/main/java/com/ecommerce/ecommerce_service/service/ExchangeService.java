@@ -68,6 +68,7 @@ public class ExchangeService {
   }
 
   public Exchange getLastKnownRate() {
+    cachedExchange.setIsCached(true);
     return cachedExchange;
   }
 

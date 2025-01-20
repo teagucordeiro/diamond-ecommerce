@@ -34,7 +34,7 @@ public class TransactionController {
 
     try {
       Transaction transaction = transactionService.createTransaction(transactionDTO.getProductId());
-      return ResponseEntity.ok(transaction);
+      return ResponseEntity.ok(transaction.getTransactionId());
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
