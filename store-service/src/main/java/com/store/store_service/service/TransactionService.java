@@ -22,7 +22,7 @@ public class TransactionService {
     Product product = productService.getProduct(productId);
 
     // if (product.getQuantity() <= 0) {
-    //   throw new RuntimeException("Product out of stock: " + product.getName());
+    // throw new RuntimeException("Product out of stock: " + product.getName());
     // }
 
     // product.setQuantity(product.getQuantity() - 1);
@@ -30,5 +30,11 @@ public class TransactionService {
     Transaction transaction = new Transaction(UUID.randomUUID().toString(), product);
     transactionList.add(transaction);
     return transaction;
+  }
+
+  public void addListOfTransactions(List<Transaction> listOfTransactions) {
+    for (Transaction t : listOfTransactions) {
+      transactionList.add(t);
+    }
   }
 }

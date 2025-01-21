@@ -1,5 +1,7 @@
 package com.store.store_service.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,5 +40,19 @@ public class TransactionController {
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+  }
+
+  @PostMapping("/sell/transactions-list")
+  public ResponseEntity<String> addListOfTransactions(@RequestBody List<Transaction> listOfTransactions) {
+    if (requestFailureSimulator.shouldFail(Double.parseDouble(storeSellErrorProbability))) {
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service temporarily unavailable");
+    }
+
+    try {
+      transactionService.addListOfTransactions(listOfTransactions);
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+    return ResponseEntity.ok("All transactions added");
   }
 }

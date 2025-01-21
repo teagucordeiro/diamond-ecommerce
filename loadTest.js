@@ -4,9 +4,9 @@ import { Counter, Trend, Rate, Gauge } from 'k6/metrics';
 
 export const options = {
   stages: [
-    { duration: "3s", target: 100 },
-    { duration: "3s", target: 100 },
-    { duration: "3s", target: 0 },
+    { duration: "30s", target: 2000 },
+    { duration: "30s", target: 2000 },
+    { duration: "30s", target: 0 },
   ],
 };
 

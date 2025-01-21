@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class Transaction {
   private String transactionId;
-  private Product productId;
+  private Product product;
 }

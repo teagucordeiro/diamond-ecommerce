@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Transaction {
-  private String transactionId;
-  private Product product;
+public class TransactionRequest {
+    private String productId;
 }
