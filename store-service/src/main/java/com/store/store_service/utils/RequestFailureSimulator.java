@@ -39,4 +39,8 @@ public class RequestFailureSimulator {
 
     return inErrorState.get();
   }
+
+  public boolean isInErrorState() {
+    return inErrorState.get();
+}
 }
