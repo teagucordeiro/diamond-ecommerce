@@ -33,7 +33,7 @@ public class SellRetryTask {
     }
   }
 
-  @Scheduled(fixedDelay = 300 * 1000)
+  @Scheduled(fixedDelay = 30 * 1000)
   public void retryFailedRequests() {
     var failedLogs = failureLogRepository.findByResolvedFalse();
 
@@ -41,7 +41,7 @@ public class SellRetryTask {
       String storeSellEndpointStatus = storeSellService.fetchStoreSellStatus().block();
       System.out.println("Store sell status: " + storeSellEndpointStatus);
 
-      sentLogsToTryPostSellAgain(storeSellEndpointStatus, null);
+      sentLogsToTryPostSellAgain(storeSellEndpointStatus, failedLogs);
     }
   }
 }
