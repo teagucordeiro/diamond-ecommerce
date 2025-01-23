@@ -13,7 +13,8 @@ import com.ecommerce.ecommerce_service.model.Transaction;
 import com.ecommerce.ecommerce_service.model.TransactionRequest;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class StoreSellService {
@@ -29,28 +30,24 @@ public class StoreSellService {
     }
 
     @CircuitBreaker(name = "storeService", fallbackMethod = "fallbackCreateTransaction")
-    @Retry(name = "storeServiceRetry")
-    public String createTransaction(String productId, Product product) {
-        for (WebClient webClient : storeWebClientReplicas) {
-            try {
-                LOGGER.info("Trying replica: {}", webClient);
-                return webClient.post().uri("/sell").bodyValue(new TransactionRequest(productId)).retrieve()
-                        .bodyToMono(String.class).block();
-            } catch (Exception e) {
-                LOGGER.error("Failed to communicate with replica: {}", webClient, e);
-            }
-        }
-
-        throw new RuntimeException("All replicas failed");
+    public Mono<String> createTransaction(String productId, Product product) {
+        return Flux.fromIterable(storeWebClientReplicas).concatMap(webClient -> {
+            LOGGER.info("Trying replica: {}", webClient);
+            return webClient.post().uri("/sell").bodyValue(new TransactionRequest(productId)).retrieve()
+                    .bodyToMono(String.class).onErrorResume(e -> {
+                        LOGGER.error("Failed to communicate with replica: {}", webClient, e);
+                        return Mono.empty();
+                    });
+        }).next().switchIfEmpty(Mono.error(new RuntimeException("All replicas failed")));
     }
 
-    private String fallbackCreateTransaction(String productId, Product product, Throwable throwable) {
+    private Mono<String> fallbackCreateTransaction(String productId, Product product, Throwable throwable) {
         LOGGER.error("Circuit breaker activated. Fallback method called. Cause: {}", throwable.getMessage());
         Transaction transactionFallback = new Transaction(UUID.randomUUID().toString(), product);
 
         LOGGER.warn("Returning fallback transaction ID: {}", transactionFallback.getTransactionId());
         rabbitMQService.sendTransaction(transactionFallback);
 
-        return "fallbackID-" + transactionFallback.getTransactionId();
+        return Mono.just("fallbackID-" + transactionFallback.getTransactionId());
     }
 }
