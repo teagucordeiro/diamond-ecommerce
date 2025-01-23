@@ -10,13 +10,19 @@ services:
     environment:
       STORE_REPLICA_NAME: "diamond-ecommerce-store"
       EXCHANGE_URL: "http://exchange:8082"
+      STORE_URL: "http://store:8081"
       FIDELITY_URL: "http://fidelity:8083"
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/ecommerce-bonus-log-db
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ecommerce
+      SPRING_RABBITMQ_PASSWORD: papasord
     depends_on:
       - store
       - exchange
       - fidelity
       - database
+      - rabbitmq
 
   store:
     build:
@@ -70,3 +76,14 @@ services:
       POSTGRES_PASSWORD: papasord
       POSTGRES_USER: ecommerce
       POSTGRES_DB: ecommerce-bonus-log-db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ecommerce
+      RABBITMQ_DEFAULT_PASS: papasord

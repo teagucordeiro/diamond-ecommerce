@@ -13,9 +13,9 @@ public class ProductService {
   private static final List<Product> productList = new ArrayList<>();
 
   static {
-    productList.add(new Product("1", "Redmi Note 12", 1200.00, 999999));
-    productList.add(new Product("2", "MacBook Pro", 2500.00, 999999));
-    productList.add(new Product("3", "PlayStation 5", 500.00, 999999));
+    productList.add(new Product("1", "Redmi Note 12", 1200.00, 9999));
+    productList.add(new Product("2", "MacBook Pro", 2500.00, 9999));
+    productList.add(new Product("3", "PlayStation 5", 500.00, 9999));
   }
 
   public List<Product> getAllProducts() {

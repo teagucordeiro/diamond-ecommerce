@@ -1,7 +1,8 @@
 package com.ecommerce.ecommerce_service.service;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
+import java.util.List;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,17 +12,20 @@ import com.ecommerce.ecommerce_service.model.Product;
 import com.ecommerce.ecommerce_service.model.Transaction;
 import com.ecommerce.ecommerce_service.model.TransactionRequest;
 
-import java.util.List;
-import java.util.UUID;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Service
 public class StoreSellService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StoreSellService.class);
-    private final List<WebClient> storeWebClientReplicas;
 
-    public StoreSellService(List<WebClient> storeWebClientReplicas) {
+    private final List<WebClient> storeWebClientReplicas;
+    private final RabbitMQService rabbitMQService;
+
+    public StoreSellService(List<WebClient> storeWebClientReplicas, RabbitMQService rabbitMQService) {
         this.storeWebClientReplicas = storeWebClientReplicas;
+        this.rabbitMQService = rabbitMQService;
     }
 
     @CircuitBreaker(name = "storeService", fallbackMethod = "fallbackCreateTransaction")
@@ -42,9 +46,11 @@ public class StoreSellService {
 
     private String fallbackCreateTransaction(String productId, Product product, Throwable throwable) {
         LOGGER.error("Circuit breaker activated. Fallback method called. Cause: {}", throwable.getMessage());
-
         Transaction transactionFallback = new Transaction(UUID.randomUUID().toString(), product);
+
         LOGGER.warn("Returning fallback transaction ID: {}", transactionFallback.getTransactionId());
+        rabbitMQService.sendTransaction(transactionFallback);
+
         return "fallbackID-" + transactionFallback.getTransactionId();
     }
 }
