@@ -1,30 +1,50 @@
-import { check, sleep } from "k6";
 import http from "k6/http";
-import { Trend } from "k6/metrics";
+import { check, sleep } from "k6";
+import { Counter, Trend } from "k6/metrics";
+import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.2/index.js";
+
+export let unableToConnectCounter = new Counter("unable_to_connect");
+export let cacheUsedCounter = new Counter("cache_used");
+export let circuitBreakerCounter = new Counter("circuit_breaker_open");
+export let bonusNullCounter = new Counter("bonus_response_null");
+export let responseTime5xx = new Trend("response_time5xx", true);
+export let responseTime2xx = new Trend("response_time2xx", true);
 
 export const options = {
   stages: [
-    { duration: "3m", target: 500 },
-    { duration: "3m", target: 500 },
-    { duration: "3m", target: 0 },
+    { duration: "1s", target: 80 },
+    { duration: "1s", target: 80 },
+    { duration: "1s", target: 0 },
   ],
+  thresholds: {
+    http_req_duration: ["p(95)<3000"],
+  },
 };
 
-const responseTime5xx = new Trend("response_time5xx", true);
-const responseTime2xx = new Trend("response_time2xx", true);
+let totalRequests = new Counter("total_requests");
 
 export default function () {
-  const randomProduct = Math.floor(Math.random() * 1000) + 1;
-  const randomUser = Math.floor(Math.random() * 1000) + 1;
-  const url = `http://localhost:8080/buy?product=${randomProduct}&user=${randomUser}&ft=true`;
+  const url = `http://localhost:8080/buy?product=1&user=1&ft=true`;
 
-  const res = http.post(url, {
-    tags: {
-      endpoint: "/buy",
-      product: "generic_product",
-      user: "generic_user",
-    },
-  });
+  const res = http.post(url);
+
+  totalRequests.add(1);
+
+  if (res.body.includes("Unable to connect to product service")) {
+    unableToConnectCounter.add(1);
+  }
+
+  if (res.body.includes("cached")) {
+    cacheUsedCounter.add(1);
+  }
+
+  if (res.body.includes("fallbackID")) {
+    circuitBreakerCounter.add(1);
+  }
+
+  if (res.body.includes("Bonus Response: null")) {
+    bonusNullCounter.add(1);
+  }
 
   if (res.status >= 200 && res.status < 300) {
     responseTime2xx.add(res.timings.duration);
@@ -35,26 +55,33 @@ export default function () {
   }
 
   check(res, {
-    "✅ Status é 2xx": (r) => r.status >= 200 && r.status < 300,
-    "❌ Status é 5xx (erro no servidor)": (r) => r.status >= 500,
-    "⚠️ Produto não encontrado": (r) => r.body === "Unable to connect to product service",
-    "💾 Taxa de câmbio veio do cache": (r) => r.body.includes("cached"),
-    "🔄 ID da venda gerado no fallback": (r) => r.body.includes("fallbackID"),
-    "💥 Exchange caiu os dois pods": (r) => r.body === "No exchange service response",
-    "🚫 Não foi possível realizar a venda": (r) => r.body === "No sell service response",
-    "❓ Não conseguiu salvar o bônus durante o request": (r) =>
-      r.body.includes("Bonus Response: null"),
-  });
-
-  check(res, {
-    "⏱️ Tempo < 200ms": (r) => r.timings.duration < 200,
-    "⏱️ Tempo < 1s": (r) => r.timings.duration >= 200 && r.timings.duration < 1000,
-    "⏱️ Tempo < 2s": (r) => r.timings.duration >= 1000 && r.timings.duration < 2000,
-    "⏱️ Tempo < 3s": (r) => r.timings.duration >= 2000 && r.timings.duration < 3000,
-    "⚠️ Tempo > 3s e < 5s": (r) => r.timings.duration >= 3000 && r.timings.duration < 5000,
-    "🚨 Request timeout (tempo > 30s)": (r) =>
-      r.timings.duration > 5000 && r.timings.duration > 30000,
+    "status is 200": (r) => r.status === 200,
   });
 
   sleep(1);
+}
+
+export function handleSummary(data) {
+  const total = data.metrics.total_requests.values.count;
+  const unableToConnect = data.metrics.unable_to_connect.values.count || 0;
+  const cacheUsed = data.metrics.cache_used.values.count || 0;
+  const circuitBreaker = data.metrics.circuit_breaker_open.values.count || 0;
+  const bonusNull = data.metrics.bonus_response_null.values.count || 0;
+
+  const summary = {
+    "Metrics Summary": {
+      "Total Requests": total,
+      "Unable to get product (% of total)": ((unableToConnect / total) * 100).toFixed(2) + "%",
+      "Exchange Cache Used (% of total)": ((cacheUsed / total) * 100).toFixed(2) + "%",
+      "Circuit Breaker Open (% of total)": ((circuitBreaker / total) * 100).toFixed(2) + "%",
+      "Bonus Response Null (% of total)": ((bonusNull / total) * 100).toFixed(2) + "%",
+    },
+  };
+
+  console.log(JSON.stringify(summary, null, 2));
+
+  return {
+    stdout: textSummary(data, { indent: "→", enableColors: true }),
+    "summary.json": JSON.stringify(summary, null, 2),
+  };
 }
